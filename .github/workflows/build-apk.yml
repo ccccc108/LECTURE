@@ -1,0 +1,115 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: 取出代码
+        uses: actions/checkout@v4
+
+      - name: 检查仓库结构
+        run: |
+          echo "===== 根目录 ====="
+          ls -la
+          echo "===== 所有 .gradle 文件 ====="
+          find . -maxdepth 3 -name "*.gradle" | sort || true
+          echo "===== settings.gradle ====="
+          cat settings.gradle 2>/dev/null || echo "（没有 settings.gradle）"
+          echo "===== app 目录 ====="
+          ls -R app 2>/dev/null | head -60 || echo "（没有 app 目录）"
+          if [ ! -f app/build.gradle ]; then
+            echo "::error::仓库里缺少 app/build.gradle —— 上传时目录结构被拍平了。请把 app 文件夹整个拖拽上传"
+            exit 1
+          fi
+          if ! grep -q ":app" settings.gradle 2>/dev/null; then
+            echo "::error::settings.gradle 里缺少 include ':app'"
+            exit 1
+          fi
+          echo "结构检查通过"
+
+      - name: 安装 JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: 安装 Gradle 8.7
+        run: |
+          cd "$HOME"
+          curl -fsSL --retry 5 --retry-delay 3 -o gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q -o gradle.zip
+          echo "$HOME/gradle-8.7/bin" >> "$GITHUB_PATH"
+
+      - name: 准备 Android SDK（android-34）
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$HOME/android-sdk}"
+          echo "SDK_ROOT=$SDK_ROOT"
+          SDKM="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKM" ]; then
+            mkdir -p "$SDK_ROOT/cmdline-tools"
+            curl -fsSL --retry 5 --retry-delay 3 -o /tmp/cmdline.zip https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+            rm -rf /tmp/cmdline; mkdir -p /tmp/cmdline
+            unzip -q /tmp/cmdline.zip -d /tmp/cmdline
+            mv /tmp/cmdline/cmdline-tools "$SDK_ROOT/cmdline-tools/latest"
+            SDKM="$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          fi
+          if [ ! -d "$SDK_ROOT/platforms/android-34" ]; then
+            yes | "$SDKM" --sdk_root="$SDK_ROOT" --licenses > /dev/null 2>&1 || true
+            "$SDKM" --sdk_root="$SDK_ROOT" "platforms;android-34" "build-tools;34.0.0" "platform-tools" > /dev/null
+          fi
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "sdk.dir=$SDK_ROOT" > local.properties
+          ls "$SDK_ROOT/platforms"
+
+      - name: 编译 Debug APK
+        run: |
+          set -o pipefail
+          gradle -v
+          for i in 1 2 3; do
+            echo "===== 第 $i 次尝试 ====="
+            if gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee -a build.log; then
+              echo "构建成功"; exit 0
+            fi
+            echo "第 $i 次失败，30 秒后重试"; sleep 30
+          done
+          exit 1
+
+      - name: 失败时提取关键错误（看这里）
+        if: failure()
+        run: |
+          {
+            echo "## 构建失败：关键错误"
+            echo '```'
+            if [ -f build.log ]; then
+              grep -n -A 30 "What went wrong" build.log | head -50 || true
+              echo "-----"
+              grep -iE "error: |Could not resolve|Could not GET|SDK location|Failed to find|Unsupported class|requires Java|Caused by|FAILURE" build.log | head -20 || true
+            else
+              echo "构建没有产出 build.log（可能是更早的步骤失败）"
+            fi
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          tail -c 5000 "$GITHUB_STEP_SUMMARY" || true
+
+      - name: 上传 APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClassNote-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: 上传构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: build.log
+          if-no-files-found: ignore
