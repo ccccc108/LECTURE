@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ListView
+        android:id="@+id/listSessions"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="#22000000"
+        android:dividerHeight="1dp" />
+
+    <TextView
+        android:id="@+id/txtEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="还没有课堂记录。\n回到首页录音并结束后，这里会出现笔记。"
+        android:textSize="16sp"
+        android:visibility="gone" />
+</FrameLayout>

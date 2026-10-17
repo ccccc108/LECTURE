@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="① 转写服务（语音→英文文字）\n默认用硅基流动 SenseVoice：注册后在“API 密钥”页复制 Key，Base URL 保持默认即可。"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="Base URL"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edAsrBase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://api.siliconflow.cn/v1"
+            android:inputType="textUri"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="API Key"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edAsrKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="sk-..."
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="模型名"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edAsrModel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="FunAudioLLM/SenseVoiceSmall"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="分片时长（秒，8~30，越小字幕越“实时”，请求次数越多）"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edChunk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="15"
+            android:inputType="number"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="18dp"
+            android:text="② 总结服务（转写稿→中文课堂笔记）\n默认用 DeepSeek 官方接口：在 platform.deepseek.com 创建 API Key；模型用 deepseek-flash 即可。"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="Base URL"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edLlmBase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://api.deepseek.com"
+            android:inputType="textUri"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="API Key"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edLlmKey"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="sk-..."
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:text="模型名"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/edLlmModel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="deepseek-flash"
+            android:inputType="text"
+            android:singleLine="true"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="保存设置" />
+
+            <Button
+                android:id="@+id/btnTest"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="测试总结服务" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnDefault"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="恢复默认地址与模型" />
+
+        <TextView
+            android:id="@+id/txtVersion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="18dp"
+            android:text="说明：两个 Key 只保存在本机应用私有目录；录音音频与笔记也只存在本机。"
+            android:textSize="12sp" />
+    </LinearLayout>
+</ScrollView>
